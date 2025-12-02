@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>SibolTech - Dashboard</title>
+	<link rel="stylesheet" href="index.css">
+</head>
+<body>
+	<header class="topbar">
+		<button id="burger" aria-label="Toggle navigation" class="burger">
+			<span></span>
+			<span></span>
+			<span></span>
+		</button>
+		<div class="brand">SibolTech</div>
+	</header>
+
+	<aside id="sidebar" class="sidebar">
+		<nav>
+			<ul>
+				<li><a href="#" data-tab="home" class="active">Home Dashboard</a></li>
+				<li><a href="#" data-tab="training">Training</a></li>
+                <li class="sidebar-dropdown">
+                <a href="#" id="predictionTab" data-tab="predicting">Prediction
+                <span class="caret">▾</span>
+                </a>
+                 <ul class="dropdown-menu">
+                    <li><a href="#" data-metric="leaves">Number of Leaves</a></li>
+                    <li><a href="#" data-metric="weight">Weight</a></li>
+                    <li><a href="#" data-metric="height">Height</a></li>
+                    <li><a href="#" data-metric="length">Length</a></li>
+                    <li><a href="#" data-metric="branches">Number of Branches</a></li>
+                    </ul>
+                </li>
+<section id="predicting" class="tab-content">
+  <h2>Predicting</h2>
+  <p class="muted">
+    Showing prediction for: 
+    <strong id="currentMetricLabel">Number of Leaves</strong>
+  </p>
+  <div class="card" style="height:280px;">
+    <canvas id="predictChart"></canvas>
+  </div>
+  <p class="muted">Prediction information and model notes go here.</p>
+</section>
+
+			
+				<li><a href="#" data-tab="sensors">Sensor Readings</a></li>
+				<li><a href="#" data-tab="calibrate">Calibrate</a></li>
+				<li><a href="#" data-tab="manual">Manual</a></li>
+			</ul>
+		</nav>
+	</aside>
+
+	<main class="main">
+		<section id="home" class="tab-content active">
+			<div class="dashboard-grid">
+				<div class="main-col">
+					<div class="sensor-cards card">
+                         <div class="card-header">Sensor Readings</div>
+						<div class="sensor" data-key="ph"><div class="label">pH</div>
+                        <div class="value" id="val-ph">6.5</div></div>
+						<div class="sensor" data-key="do"><div class="label">DO</div>
+                        <div class="value" id="val-do">8.1</div></div>
+						<div class="sensor" data-key="temp"><div class="label">Temperature</div>
+                        <div class="value" id="val-temp">25.1</div></div>
+						<div class="sensor" data-key="hum"><div class="label">Humidity</div>
+                        <div class="value" id="val-hum">70</div></div>
+						<div class="sensor" data-key="tds"><div class="label">TDS</div>
+                        <div class="value" id="val-tds">1.2</div></div>
+					</div>
+
+					<div class="card growth-card">
+						<div class="card-header">Growth Prediction</div>
+						<canvas id="growthChart" width="600" height="220"></canvas>
+						<div class="legend"><span class="dot predicted"></span> Predicted <span class="dot actual"></span> Actual</div>
+					</div>
+                    
+					<div class="card growth-card">
+						<div class="card-header">Growth Prediction</div>
+						<canvas id="growthChart" width="600" height="220"></canvas>
+						<div class="legend"><span class="dot predicted"></span> Predicted <span class="dot actual"></span> Actual</div>
+					</div>
+                    
+					<div class="card growth-card">
+						<div class="card-header">Growth Prediction</div>
+						<canvas id="growthChart" width="600" height="220"></canvas>
+						<div class="legend"><span class="dot predicted"></span> Predicted <span class="dot actual"></span> Actual</div>
+					</div>
+                    
+					<div class="card growth-card">
+						<div class="card-header">Growth Prediction</div>
+						<canvas id="growthChart" width="600" height="220"></canvas>
+						<div class="legend"><span class="dot predicted"></span> Predicted <span class="dot actual"></span> Actual</div>
+					</div>
+                    
+					<div class="card growth-card">
+						<div class="card-header">Growth Prediction</div>
+						<canvas id="growthChart" width="600" height="220"></canvas>
+						<div class="legend"><span class="dot predicted"></span> Predicted <span class="dot actual"></span> Actual</div>
+					</div>
+
+					<div class="card notifications">
+						<div class="card-header">Notifications</div>
+						<div class="notification">Low pH level detected <span class="time">2 hours ago</span></div>
+					</div>
+				</div>
+
+				<aside class="side-col">
+					<div class="actuator-card">
+						<div class="card-header">Actuator Status</div>
+						<div class="actuators">
+							<div class="act">
+								<div>Water Pump</div>
+								<span class="state" id="act-water">ON</span>
+							</div>
+							<div class="act">
+								<div>Air Pump</div>
+								<span class="state" id="act-air">OFF</span>
+							</div>
+							<div class="act">
+								<div>Exhaust Fan</div>
+								<span class="state" id="act-fan">ON</span>
+							</div>
+							<div class="act">
+								<div>Grow Lights</div>
+								<span class="state" id="act-lights">ON</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="card mini-sensors">
+						<div class="card-header">Sensor Readings</div>
+						<div class="mini-graph">
+							<div class="mini-label">DO</div>
+							<canvas class="mini-canvas" id="mini1" width="180" height="50"></canvas>
+						</div>
+						<div class="mini-graph">
+							<div class="mini-label">pH</div>
+							<canvas class="mini-canvas" id="mini2" width="200" height="50"></canvas>
+						</div>
+						<div class="mini-graph">
+							<div class="mini-label">Temperature</div>
+							<canvas class="mini-canvas" id="mini3" width="200" height="50"></canvas>
+						</div>
+					</div>
+				</aside>
+			</div>
+		</section>
+
+		<section id="training" class="tab-content">
+			<h2>Training</h2>
+			<div class="form-row">
+				<label for="systemSelect">System</label>
+				<select id="systemSelect">
+					<option value="DWC">DWC</option>
+					<option value="Aeroponic">Aeroponic</option>
+					<option value="Traditional">Traditional</option>
+				</select>
+			</div>
+
+			<div id="sensorParams" class="sensor-params">
+				<h3>Sensor Readings</h3>
+				<div class="form-row"><label>pH</label><input type="number" step="0.1" class="sensor-input" data-sensor="ph"></div>
+				<div class="form-row"><label>DO</label><input type="number" step="0.1" class="sensor-input" data-sensor="do"></div>
+				<div class="form-row"><label>Temperature</label><input type="number" step="0.1" class="sensor-input" data-sensor="temp"></div>
+				<div class="form-row"><label>Humidity</label><input type="number" step="0.1" class="sensor-input" data-sensor="hum"></div>
+				<div class="form-row"><label>TDS</label><input type="number" step="0.1" class="sensor-input" data-sensor="tds"></div>
+			</div>
+
+			<div id="plantsContainer">
+				<h3>Plants</h3>
+				<div id="plantList"></div>
+				<button id="addPlant">Add Plant</button>
+			</div>
+		</section>
+
+		<section id="sensors" class="tab-content">
+			<h2>Sensor Readings</h2>
+			<div class="grid">
+				<div class="card">Gauges placeholder</div>
+				<div class="card">Actuators placeholder</div>
+			</div>
+		</section>
+
+		<section id="calibrate" class="tab-content">
+			<h2>Calibrate</h2>
+			<p>Select sensor to calibrate and apply offset.</p>
+			<div class="form-row">
+				<label for="calSensor">Sensor</label>
+				<select id="calSensor">
+					<option value="ph">pH</option>
+					<option value="do">DO</option>
+					<option value="temp">Temperature</option>
+					<option value="hum">Humidity</option>
+					<option value="tds">TDS</option>
+				</select>
+				<label>Offset</label>
+				<input id="calOffset" type="number" step="0.01" value="0">
+				<button id="applyCal">Apply</button>
+			</div>
+		</section>
+
+		<section id="manual" class="tab-content">
+			<h2>User Manual</h2>
+			<p>How to use the system: follow these steps...</p>
+		</section>
+	</main>
+
+	<script src="index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
+
