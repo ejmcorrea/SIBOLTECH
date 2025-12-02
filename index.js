@@ -109,10 +109,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
 	systemSelect.addEventListener('change', updateSystemUI);
 	updateSystemUI();
 
-	// Simple Predicting canvas placeholder
+	// Simple Predicting canvas (with 6 plants)
 	const predictCanvas = document.getElementById('predictChart');
 	const predictionMetricSelect = document.getElementById('predictionMetric');
 	const predictInfo = document.getElementById('predictInfo');
+	const predictionTitle = document.getElementById('predictionTitle');
 
 	const metricInfo = {
 		leaves: { label: 'Number of Leaves', unit: 'leaves', range: [5, 25], info: 'Predicted leaf count based on growth model.' },
@@ -123,7 +124,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 	};
 
 	function drawPredictionChart(){
-		if(!predictCanvas || !predictCanvas.getContext) return;
+		if(!predictCanvas || !predictCanvas.getContext || !predictionMetricSelect) return;
 		const metric = predictionMetricSelect.value;
 		const info = metricInfo[metric];
 		if(!info) return;
@@ -153,19 +154,23 @@ document.addEventListener('DOMContentLoaded', ()=>{
 			ctx.beginPath(); ctx.moveTo(x, topPad); ctx.lineTo(x, h - bottomPad); ctx.stroke();
 		}
 
-		// generate prediction data for this metric
-		const data = randomWalk(30, (minVal+maxVal)/2, (maxVal-minVal)/8)
-			.map(v => Math.max(minVal, Math.min(maxVal, v)));
-
-		// draw line
-		ctx.strokeStyle = '#2b6ef6'; ctx.lineWidth = 2.5; ctx.beginPath();
+		// draw 6 plant lines
 		const plotW = w - leftPad - rightPad, plotH = h - topPad - bottomPad;
-		data.forEach((v, i) => {
-			const x = leftPad + (i/(data.length-1))*plotW;
-			const y = topPad + (1 - (v - minVal)/(maxVal - minVal)) * plotH;
-			if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-		});
-		ctx.stroke();
+		const colors = ['#2b6ef6', '#f97316', '#22c55e', '#a855f7', '#0ea5e9', '#ef4444'];
+		for(let p = 0; p < 6; p++){
+			const data = randomWalk(30, (minVal+maxVal)/2, (maxVal-minVal)/8)
+				.map(v => Math.max(minVal, Math.min(maxVal, v)));
+
+			ctx.strokeStyle = colors[p % colors.length];
+			ctx.lineWidth = 2;
+			ctx.beginPath();
+			data.forEach((v, i) => {
+				const x = leftPad + (i/(data.length-1))*plotW;
+				const y = topPad + (1 - (v - minVal)/(maxVal - minVal)) * plotH;
+				if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+			});
+			ctx.stroke();
+		}
 
 		// x-axis label
 		ctx.fillStyle = '#6c7380'; ctx.font = '11px Arial'; ctx.textAlign = 'center';
@@ -178,10 +183,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
 		ctx.fillText(info.label + ` (${info.unit})`, 0, 0);
 		ctx.restore();
 
-		// update info text
+		// update title and info text
+		if(predictionTitle) predictionTitle.textContent = `Prediction - ${info.label}`;
 		if(predictInfo) predictInfo.textContent = info.info;
 	}
 
+
+	// initial prediction chart with default metric
+	if(predictionMetricSelect){
+		if(!predictionMetricSelect.value) predictionMetricSelect.value = 'leaves';
+		drawPredictionChart();
+	}
 
 	// Home dashboard: draw growth chart and mini graphs, populate sensor values
 	const growthCanvas = document.getElementById('growthChart');
@@ -312,6 +324,44 @@ document.addEventListener('DOMContentLoaded', ()=>{
 	drawGrowth(); drawMini('mini1'); drawMini('mini2'); drawMini('mini3'); updateSensorsAndActuators();
 	setInterval(()=>{ drawGrowth(); drawMini('mini1'); drawMini('mini2'); drawMini('mini3'); updateSensorsAndActuators(); }, 5000);
 
+	// Prediction dropdown behaviour in sidebar
+	const predictionTab = document.getElementById('predictionTab');
+	const predictionItem = predictionTab ? predictionTab.closest('.sidebar-dropdown') : null;
+	if(predictionTab && predictionItem){
+		// open/close dropdown when clicking main "Prediction" item
+		predictionTab.addEventListener('click', function (e) {
+			e.preventDefault();
+			predictionItem.classList.toggle('open');
+		});
+
+		// handle click on each metric in dropdown
+		const metricLinks = predictionItem.querySelectorAll('.dropdown-menu a[data-metric]');
+		metricLinks.forEach(link => {
+			link.addEventListener('click', function(e){
+				e.preventDefault();
+				const metric = link.getAttribute('data-metric');
+				if(!metric || !metricInfo[metric]) return;
+
+				// switch tab to predicting
+				tabs.forEach(x=>x.classList.remove('active'));
+				contents.forEach(c=>c.classList.remove('active'));
+				predictionTab.classList.add('active');
+				const target = document.getElementById('predicting');
+				if(target) target.classList.add('active');
+
+				// set metric and redraw chart
+				if(predictionMetricSelect){
+					predictionMetricSelect.value = metric;
+				}
+				drawPredictionChart();
+
+				// close dropdown and sidebar (on mobile)
+				predictionItem.classList.remove('open');
+				if(window.innerWidth <= 900) sidebar.classList.remove('open');
+			});
+		});
+	}
+
 	// Calibration apply
 	const applyCal = document.getElementById('applyCal');
 	applyCal.addEventListener('click', ()=>{
@@ -331,123 +381,4 @@ predictionTab.addEventListener('click', function (e) {
 
 	// toggle open/close
 	predictionItem.classList.toggle('open');
-});
-
-document.querySelectorAll('.dropdown-menu [data-metric]').forEach(item => {
-	item.addEventListener('click', function (e) {
-		e.preventDefault();
-		const metric = this.getAttribute('data-metric');
-		console.log('Selected metric:', metric);
-
-		// dito mo ilalagay yung logic mo:
-		// updatePredictionChart(metric);
-	});
-});
-
-function activateTab(tabId) {
-  // hide all contents
-  document.querySelectorAll('.tab-content').forEach(sec => {
-    sec.classList.remove('active');
-  });
-
-  // show selected content
-  const target = document.getElementById(tabId);
-  if (target) target.classList.add('active');
-
-  // update active link in sidebar
-  document.querySelectorAll('.sidebar nav a').forEach(a => {
-    a.classList.remove('active');
-  });
-
-  const activeLink = document.querySelector(`.sidebar nav a[data-tab="${tabId}"]`);
-  if (activeLink) activeLink.classList.add('active');
-}
-
-const predictionCtx = document.getElementById('predictChart').getContext('2d');
-
-const metricConfigs = {
-  leaves: {
-    label: 'Number of Leaves',
-    data: [3, 5, 7, 10, 13, 15],    // sample data
-  },
-  weight: {
-    label: 'Weight (g)',
-    data: [10, 14, 20, 28, 40, 55],
-  },
-  height: {
-    label: 'Height (cm)',
-    data: [2, 4, 7, 11, 16, 22],
-  },
-  length: {
-    label: 'Length (cm)',
-    data: [1, 2, 3, 5, 8, 13],
-  },
-  branches: {
-    label: 'Number of Branches',
-    data: [1, 1, 2, 3, 4, 5],
-  }
-};
-
-// shared x-axis (days, weeks, etc.)
-const baseLabels = ['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6'];
-
-let predictionChart = new Chart(predictionCtx, {
-  type: 'line',
-  data: {
-    labels: baseLabels,
-    datasets: [{
-      label: metricConfigs.leaves.label,
-      data: metricConfigs.leaves.data,
-      borderWidth: 2,
-      tension: 0.3,
-      pointRadius: 3,
-      fill: false
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        title: { display: true, text: 'Time' }
-      },
-      y: {
-        title: { display: true, text: 'Value' }
-      }
-    }
-  }
-});
-
-// dropdown open/close
-const predictionTab = document.getElementById('predictionTab');
-const predictionItem = predictionTab.closest('.sidebar-dropdown');
-
-predictionTab.addEventListener('click', function (e) {
-  e.preventDefault();
-  predictionItem.classList.toggle('open');
-});
-
-// click on metric options
-document.querySelectorAll('.dropdown-menu a[data-metric]').forEach(link => {
-  link.addEventListener('click', function (e) {
-    e.preventDefault();
-
-    const metricKey = this.getAttribute('data-metric');
-    const config = metricConfigs[metricKey];
-    if (!config) return;
-
-    // 1. lumipat sa Prediction tab
-    activateTab('predicting');
-
-    // 2. isara dropdown
-    predictionItem.classList.remove('open');
-
-    // 3. update label sa taas ng chart
-    document.getElementById('currentMetricLabel').textContent = config.label;
-
-    // 4. update chart data & label
-    predictionChart.data.datasets[0].label = config.label;
-    predictionChart.data.datasets[0].data = config.data;
-    predictionChart.update();
-  });
 });
