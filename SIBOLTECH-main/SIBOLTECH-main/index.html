@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>SibolTech - Dashboard</title>
+	<link rel="stylesheet" href="index.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+	<header class="topbar">
+		<button id="burger" aria-label="Toggle navigation" class="burger">
+			<span></span>
+			<span></span>
+			<span></span>
+		</button>
+		<div class="brand">
+			<img src="../siboltechlogo.png" alt="SibolTech" class="brand-logo">
+		</div>
+	</header>
+
+	<aside id="sidebar" class="sidebar">
+		<nav>
+			<ul>
+				<li><a href="#" data-tab="home"><span class="icon"><img src="../dashboardicon.png" alt="Dashboard"></span><span>Dashboard</span></a></li>
+				<li><a href="#" data-tab="training"><span class="icon"><img src="../trainingicon.png" alt="Training"></span><span>Training</span></a></li>
+                <li class="sidebar-dropdown">
+                <a href="#" id="predictionTab" data-tab="predicting"><span class="icon"><img src="../predictionicon.png" alt="Prediction"></span><span>Prediction</span>
+                <span class="caret">▾</span>
+                </a>
+                 <ul class="dropdown-menu">
+                    <li><a href="#" data-metric="leaves">Number of Leaves</a></li>
+                    <li><a href="#" data-metric="weight">Weight</a></li>
+                    <li><a href="#" data-metric="height">Height</a></li>
+                    <li><a href="#" data-metric="length">Length</a></li>
+                    <li><a href="#" data-metric="branches">Number of Branches</a></li>
+                    </ul>
+                </li>	
+				<li><a href="#" data-tab="sensors"><span class="icon"><img src="../sensorreadingsicon.png" alt="Sensor Readings"></span><span>Sensor Readings</span></a></li>
+				<li><a href="#" data-tab="calibrate"><span class="icon"><img src="../Calibrateicon.png" alt="Calibrate"></span><span>Calibrate</span></a></li>
+				<li><a href="#" data-tab="manual"><span class="icon"><img src="../manualicon.png" alt="Manual"></span><span>Manual</span></a></li>
+				<li><a href="#" data-tab="history"><span class="icon"><img src="../historicon.png" alt="History"></span><span>History</span></a></li>
+			</ul>
+		</nav>
+	</aside>
+
+	<main class="main">
+		<section id="home" class="tab-content active">
+			<div class="dashboard-grid">
+				<div class="main-col">
+					<div class="sensor-cards card">
+                        <div class="card-header">Sensor Readings</div>
+						<div class="sensor" data-key="ph">
+							<div class="label">
+								<span>pH Level</span>
+								<img src="../informationicon.png" alt="Info" class="info-icon" data-sensor="ph">
+							</div>
+                        <div class="value" id="val-ph"></div>
+						<div class="alert" id="alert-ph"></div></div>
+						<div class="sensor" data-key="do">
+							<div class="label">
+								<span>Dissolved Oxygen</span>
+								<img src="../informationicon.png" alt="Info" class="info-icon" data-sensor="do">
+							</div>
+                        <div class="value" id="val-do"></div>
+						<div class="alert" id="alert-do"></div></div>
+						<div class="sensor" data-key="temp">
+							<div class="label">
+								<span>Temperature</span>
+								<img src="../informationicon.png" alt="Info" class="info-icon" data-sensor="temp">
+							</div>
+                        <div class="value" id="val-temp"></div>
+						<div class="alert" id="alert-temp"></div></div>
+						<div class="sensor" data-key="hum">
+							<div class="label">
+								<span>Humidity</span>
+								<img src="../informationicon.png" alt="Info" class="info-icon" data-sensor="hum">
+							</div>
+                        <div class="value" id="val-hum"></div>
+						<div class="alert" id="alert-hum"></div></div>
+						<div class="sensor" data-key="tds">
+							<div class="label">
+								<span>Total Dissolved Solids</span>
+								<img src="../informationicon.png" alt="Info" class="info-icon" data-sensor="tds">
+							</div>
+                        <div class="value" id="val-tds"></div>
+						<div class="alert" id="alert-tds"></div></div>
+					</div>
+					<div class="actuator-card">
+						<div class="card-header">Actuator Status</div>
+						<div class="actuators">
+							<div class="act">
+								<div>Water Pump</div>
+								<span class="state" id="act-water">ON</span>
+							</div>
+							<div class="act">
+								<div>Air Pump</div>
+								<span class="state" id="act-air">OFF</span>
+							</div>
+							<div class="act">
+								<div>Exhaust Fan</div>
+								<span class="state" id="act-fan">ON</span>
+							</div>
+							<div class="act">
+								<div>Grow Lights</div>
+								<span class="state" id="act-lights">ON</span>
+							</div>
+						</div>
+					</div>
+
+                    <div class="card comparison-graph-card">
+                        <div class="graph-header">
+                            <div class="card-header">Growth Comparison</div>
+                            <div class="time-period-buttons">
+                                <button class="time-btn active" data-days="1">1 Day</button>
+                                <button class="time-btn" data-days="2">2 Days</button>
+                                <button class="time-btn" data-days="7">7 Days</button>
+                                <button class="time-btn" data-days="14">14 Days</button>
+                                <button class="time-btn" data-days="30">30 Days</button>
+                            </div>
+                        </div>
+                        <div class="graph-legend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #4CAF50;"></span>
+                                <span>Aeroponic</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #2196F3;"></span>
+                                <span>Deep Water Culture</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #FF9800;"></span>
+                                <span>Traditional</span>
+                            </div>
+                        </div>
+                        <div class="graph-container">
+                            <canvas id="comparisonGraph"></canvas>
+                            <div id="graphTooltip" class="graph-tooltip"></div>
+                        </div>
+                    </div>
+
+					<!-- Notifications will appear as popups on the side -->
+				</div>
+			</div>
+		</section>
+
+		<section id="training" class="tab-content">
+			<h2>Training</h2>
+			
+			<div class="training-system-selector card">
+				<div class="form-row">
+					<label for="systemSelect">System Type</label>
+					<select id="systemSelect">
+						<option value="DWC">Deep Water Culture</option>
+						<option value="Aeroponic">Aeroponic</option>
+						<option value="Traditional">Traditional Farming</option>
+					</select>
+				</div>
+			</div>
+
+			<div id="sensorParams" class="sensor-params card">
+				<div class="card-header">
+					<span class="header-icon">📊</span>
+					<span>Sensor Readings / Parameters</span>
+				</div>
+				<div class="sensor-inputs-grid">
+					<div class="sensor-input-card" data-sensor="ph">
+						<div class="sensor-input-icon">🧪</div>
+						<label class="sensor-input-label">pH Level</label>
+						<input type="number" step="0.1" class="sensor-input" data-sensor="ph" placeholder="6.5">
+						<span class="sensor-unit">pH</span>
+					</div>
+					<div class="sensor-input-card" data-sensor="do">
+						<div class="sensor-input-icon">💨</div>
+						<label class="sensor-input-label">Dissolved Oxygen</label>
+						<input type="number" step="0.1" class="sensor-input" data-sensor="do" placeholder="8.0">
+						<span class="sensor-unit">mg/L</span>
+					</div>
+					<div class="sensor-input-card" data-sensor="temp">
+						<div class="sensor-input-icon">🌡️</div>
+						<label class="sensor-input-label">Temperature</label>
+						<input type="number" step="0.1" class="sensor-input" data-sensor="temp" placeholder="25.0">
+						<span class="sensor-unit">°C</span>
+					</div>
+					<div class="sensor-input-card" data-sensor="hum">
+						<div class="sensor-input-icon">💧</div>
+						<label class="sensor-input-label">Humidity</label>
+						<input type="number" step="0.1" class="sensor-input" data-sensor="hum" placeholder="70">
+						<span class="sensor-unit">%</span>
+					</div>
+					<div class="sensor-input-card" data-sensor="tds">
+						<div class="sensor-input-icon">⚡</div>
+						<label class="sensor-input-label">TDS</label>
+						<input type="number" step="0.1" class="sensor-input" data-sensor="tds" placeholder="1.2">
+						<span class="sensor-unit">ppm</span>
+					</div>
+				</div>
+			</div>
+
+			<div id="plantsContainer" class="card">
+				<div class="card-header">
+					<div>
+						<span class="header-icon">🌱</span>
+						<span>Plants</span>
+					</div>
+					<button id="addPlant" class="add-plant-btn">+ Add Plant</button>
+				</div>
+				<div id="plantList"></div>
+			</div>
+		</section>
+
+		<section id="sensors" class="tab-content">
+			<h2>Sensor Readings</h2>
+			<div class="grid">
+				<div class="card mini-sensors">
+					<div class="card-header">
+						<span class="header-icon">📊</span>
+						<span>Sensor Readings</span>
+					</div>
+					<div class="mini-graphs-container">
+						<div class="mini-graph-card">
+							<div class="mini-graph-header">
+								<div class="mini-graph-icon">💨</div>
+								<div class="mini-label">Dissolved Oxygen</div>
+							</div>
+							<div class="mini-canvas-wrapper">
+								<canvas class="mini-canvas" id="mini1"></canvas>
+							</div>
+							<div class="mini-graph-value" id="mini1-value">8.1 mg/L</div>
+						</div>
+						<div class="mini-graph-card">
+							<div class="mini-graph-header">
+								<div class="mini-graph-icon">🧪</div>
+								<div class="mini-label">pH Level</div>
+							</div>
+							<div class="mini-canvas-wrapper">
+								<canvas class="mini-canvas" id="mini2"></canvas>
+							</div>
+							<div class="mini-graph-value" id="mini2-value">6.5 pH</div>
+						</div>
+						<div class="mini-graph-card">
+							<div class="mini-graph-header">
+								<div class="mini-graph-icon">🌡️</div>
+								<div class="mini-label">Temperature</div>
+							</div>
+							<div class="mini-canvas-wrapper">
+								<canvas class="mini-canvas" id="mini3"></canvas>
+							</div>
+							<div class="mini-graph-value" id="mini3-value">25.1 °C</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section id="calibrate" class="tab-content">
+			<h2>Calibrate</h2>
+			<p>Select sensor to calibrate and apply offset.</p>
+			<div class="form-row">
+				<label for="calSensor">Sensor</label>
+				<select id="calSensor">
+					<option value="ph">pH</option>
+					<option value="do">DO</option>
+					<option value="temp">Temperature</option>
+					<option value="hum">Humidity</option>
+					<option value="tds">TDS</option>
+				</select>
+				<label>Offset</label>
+				<input id="calOffset" type="number" step="0.01" value="0">
+				<button id="applyCal">Apply</button>
+			</div>
+		</section>
+
+		<section id="predicting" class="tab-content">
+			<div class="prediction-header">
+				<h2 id="predictionTitle">Prediction - Select a Metric</h2>
+				<p id="predictionDescription" class="prediction-description">Choose a metric from the sidebar to view predictions for all plants.</p>
+			</div>
+			<div id="plantsGraphsContainer" class="plants-graphs-container">
+				<!-- 6 plant graphs will be generated here -->
+			</div>
+		</section>
+
+		<section id="manual" class="tab-content">
+			<h2>User Manual</h2>
+			<p>How to use the system: follow these steps...</p>
+		</section>
+	</main>
+
+	<!-- Threshold Information Modal -->
+	<div id="thresholdModal" class="threshold-modal">
+		<div class="threshold-modal-content">
+			<div class="threshold-modal-header">
+				<h3 id="thresholdTitle">Sensor Thresholds</h3>
+				<button class="threshold-close" id="thresholdClose">&times;</button>
+			</div>
+			<div class="threshold-modal-body">
+				<div class="threshold-item neutral-threshold">
+					<div class="threshold-indicator neutral-indicator"></div>
+					<div class="threshold-info">
+						<div class="threshold-label">Neutral</div>
+						<div class="threshold-range" id="thresholdNeutral">-</div>
+					</div>
+				</div>
+				<div class="threshold-item normal-threshold">
+					<div class="threshold-indicator normal-indicator"></div>
+					<div class="threshold-info">
+						<div class="threshold-label">Normal</div>
+						<div class="threshold-range" id="thresholdNormal">-</div>
+					</div>
+				</div>
+				<div class="threshold-item dangerous-threshold">
+					<div class="threshold-indicator dangerous-indicator"></div>
+					<div class="threshold-info">
+						<div class="threshold-label">Dangerous</div>
+						<div class="threshold-range" id="thresholdDangerous">-</div>
+					</div>
+				</div>
+			</div>
+			<div class="threshold-modal-footer">
+				<div class="threshold-unit" id="thresholdUnit"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Notification Container -->
+	<div id="notificationContainer" class="notification-container"></div>
+
+	<script src="index.js"></script>
+	
+</body>
+</html>
+
