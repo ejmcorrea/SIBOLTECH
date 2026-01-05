@@ -91,6 +91,16 @@
 					else el.style.display = isChecked ? 'block' : 'none';
 				}
 			});
+			
+			// When turning ON, reset inputs to clear previous data
+			if (isChecked) {
+				resetInputs(sensorType);
+			} 
+			// When turning OFF, clear all input data and reset state
+			else {
+				state[sensorType].data = [];
+				state[sensorType].currentPoint = 1;
+			}
 		});
 	}
 
@@ -313,9 +323,14 @@
 					btn.classList.remove('btn-apply');
 					btn.classList.add('btn-edit');
 
-					// Show sections
-					const valSection = document.getElementById(config.sections[2]);
-					if (valSection) valSection.style.setProperty('display', 'block', 'important');
+					// Show calibration values section only if all required points are completed
+					const requiredPoints = parseInt(state[sensorType].mode);
+					const completedPoints = state[sensorType].data.length;
+					
+					if (completedPoints >= requiredPoints) {
+						const valSection = document.getElementById(config.sections[2]);
+						if (valSection) valSection.style.setProperty('display', 'block', 'important');
+					}
 					const inputPanel = document.getElementById(config.sections[1]);
 					if (inputPanel) inputPanel.style.setProperty('display', 'block', 'important');
 				} else {
@@ -323,6 +338,14 @@
 					btn.textContent = 'Apply';
 					btn.classList.remove('btn-edit');
 					btn.classList.add('btn-apply');
+					
+					// Hide calibration values section when editing
+					const valSection = document.getElementById(config.sections[2]);
+					if (valSection) valSection.style.display = 'none';
+					
+					// Remove the data point from state
+					const existingIdx = state[sensorType].data.findIndex(d => d.point === pointNum);
+					if (existingIdx >= 0) state[sensorType].data.splice(existingIdx, 1);
 				}
 			});
 		}
@@ -366,6 +389,10 @@
 				if (sensorState.data.length < maxPoints) {
 					sensorState.currentPoint++;
 					addInputRow(sensorType, sensorState.currentPoint);
+				} else {
+					// Show calibration values section only when all points are completed
+					const valSection = document.getElementById(config.sections[2]);
+					if (valSection) valSection.style.setProperty('display', 'block', 'important');
 				}
 			});
 		}
@@ -400,62 +427,118 @@
 				
 				if (!displayArea) return;
 
-				if (sensorType === 'tds') {
-					// TDS has specific IDs for display
-					const ids = { standard: 'calBufferTDS', voltage: 'calVoltageTDS', temp: 'calTempTDS', slope: 'calSlopeTDS', offset: 'calOffsetValTDS' };
-					if (document.getElementById(ids.standard)) document.getElementById(ids.standard).textContent = lastPoint.standard.toFixed(2);
-					if (document.getElementById(ids.voltage)) document.getElementById(ids.voltage).textContent = lastPoint.voltage.toFixed(2);
-					if (document.getElementById(ids.temp)) document.getElementById(ids.temp).textContent = lastPoint.temp.toFixed(2);
-					if (document.getElementById(ids.slope)) document.getElementById(ids.slope).textContent = slope;
-					if (document.getElementById(ids.offset)) document.getElementById(ids.offset).textContent = offset;
-				} else {
-					displayArea.removeAttribute('data-has-entries');
-					displayArea.classList.remove('cal-values-stack');
-					
-					let html = '';
-					const pointsToDisplay = sensorState.mode === '1' ? [lastPoint] : sensorState.data;
-				
-					pointsToDisplay.forEach((p, i) => {
-						const valLabel = sensorType === 'ph' ? 'Buffer (pH)' : 'DO Saturation (%)';
-						const val = sensorType === 'ph' ? p.buffer.toFixed(2) : p.doSaturation;
+				// Check if all required points are completed
+				const requiredPoints = parseInt(sensorState.mode);
+				const completedPoints = sensorState.data.length;
+				const allPointsCompleted = completedPoints >= requiredPoints;
 
-						// Compute per-point slope/offset so earlier points keep their values
-						let pointSlope = '-';
-						let pointOffset = '-';
-						if (sensorState.mode === '1') {
-							pointSlope = slope;
-							pointOffset = offset;
-						} else {
-							if (i === 0) {
-								const denom = sensorType === 'ph' ? p.buffer : p.doSaturation;
-								const rawSlope = denom ? (p.voltage / denom) : 0;
-								pointSlope = Number.isFinite(rawSlope) ? rawSlope.toFixed(2) : '-';
-								const rawOffset = p.temp ? (p.temp / 10) : 0;
-								pointOffset = Number.isFinite(rawOffset) ? rawOffset.toFixed(2) : '-';
-							} else {
-								const first = sensorState.data[0];
-								const denom = sensorType === 'ph' ? (p.buffer - first.buffer) : (p.doSaturation - first.doSaturation);
-								const rawSlope = denom ? ((p.voltage - first.voltage) / denom) : 0;
-								pointSlope = Number.isFinite(rawSlope) ? rawSlope.toFixed(2) : '-';
-								const avgTemp = (first.temp + p.temp) / 2;
-								const rawOffset = avgTemp ? (avgTemp / 10) : 0;
-								pointOffset = Number.isFinite(rawOffset) ? rawOffset.toFixed(2) : '-';
+				// Only show confirmation modal if all points are completed
+				if (allPointsCompleted) {
+					// Show confirmation modal
+					const confirmModal = document.getElementById('calibrationConfirmModal');
+					if (confirmModal) {
+						confirmModal.style.display = 'flex';
+						
+						// Handle confirmation
+						const confirmBtn = document.getElementById('calibrationConfirmOk');
+						const cancelBtn = document.getElementById('calibrationConfirmCancel');
+						const closeBtn = document.getElementById('calibrationConfirmClose');
+						
+						const closeModal = () => {
+							confirmModal.style.display = 'none';
+						};
+						
+						const handleConfirm = () => {
+							// Apply the calibration values
+							applyCalibrationValues(sensorType, config, sensorState, lastPoint, slope, offset, displayArea);
+							
+							// Turn off calibration mode
+							const toggle = document.getElementById(config.toggleId);
+							const toggleText = document.querySelector(`.calibration-section[data-sensor-type="${sensorType}"] .toggle-text`);
+							if (toggle) {
+								toggle.checked = false;
+								if (toggleText) toggleText.textContent = 'OFF';
+								// Hide calibration sections
+								config.sections.forEach(id => {
+									const el = document.getElementById(id);
+									if (el) el.style.display = 'none';
+								});
 							}
-						}
-
-						html += `
-							<div class="cal-value"><div class="label">${valLabel}</div><div class="value">${val}</div></div>
-							<div class="cal-value"><div class="label">Voltage (mV)</div><div class="value">${p.voltage.toFixed(2)}</div></div>
-							<div class="cal-value"><div class="label">Temperature (°C)</div><div class="value">${p.temp.toFixed(2)}</div></div>
-							<div class="cal-value"><div class="label">Slope</div><div class="value">${pointSlope}</div></div>
-							<div class="cal-value"><div class="label">Offset</div><div class="value">${pointOffset}</div></div>
-						`;
-					});
-					displayArea.innerHTML = html;
+							
+							closeModal();
+							// Remove event listeners
+							confirmBtn.removeEventListener('click', handleConfirm);
+							cancelBtn.removeEventListener('click', closeModal);
+							closeBtn.removeEventListener('click', closeModal);
+						};
+						
+						confirmBtn.addEventListener('click', handleConfirm);
+						cancelBtn.addEventListener('click', closeModal);
+						closeBtn.addEventListener('click', closeModal);
+						return;
+					}
 				}
+
 			});
 		}
 	});
+
+	// Function to apply calibration values
+	function applyCalibrationValues(sensorType, config, sensorState, lastPoint, slope, offset, displayArea) {
+		if (sensorType === 'tds') {
+			// TDS has specific IDs for display
+			const ids = { standard: 'calBufferTDS', voltage: 'calVoltageTDS', temp: 'calTempTDS', slope: 'calSlopeTDS', offset: 'calOffsetValTDS' };
+			if (document.getElementById(ids.standard)) document.getElementById(ids.standard).textContent = lastPoint.standard.toFixed(2);
+			if (document.getElementById(ids.voltage)) document.getElementById(ids.voltage).textContent = lastPoint.voltage.toFixed(2);
+			if (document.getElementById(ids.temp)) document.getElementById(ids.temp).textContent = lastPoint.temp.toFixed(2);
+			if (document.getElementById(ids.slope)) document.getElementById(ids.slope).textContent = slope;
+			if (document.getElementById(ids.offset)) document.getElementById(ids.offset).textContent = offset;
+		} else {
+			displayArea.removeAttribute('data-has-entries');
+			displayArea.classList.remove('cal-values-stack');
+			
+			let html = '';
+			const pointsToDisplay = sensorState.mode === '1' ? [lastPoint] : sensorState.data;
+		
+			pointsToDisplay.forEach((p, i) => {
+				const valLabel = sensorType === 'ph' ? 'Buffer (pH)' : 'DO Saturation (%)';
+				const val = sensorType === 'ph' ? p.buffer.toFixed(2) : p.doSaturation;
+
+				// Compute per-point slope/offset so earlier points keep their values
+				let pointSlope = '-';
+				let pointOffset = '-';
+				if (sensorState.mode === '1') {
+					pointSlope = slope;
+					pointOffset = offset;
+				} else {
+					if (i === 0) {
+						const denom = sensorType === 'ph' ? p.buffer : p.doSaturation;
+						const rawSlope = denom ? (p.voltage / denom) : 0;
+						pointSlope = Number.isFinite(rawSlope) ? rawSlope.toFixed(2) : '-';
+						const rawOffset = p.temp ? (p.temp / 10) : 0;
+						pointOffset = Number.isFinite(rawOffset) ? rawOffset.toFixed(2) : '-';
+					} else {
+						const first = sensorState.data[0];
+						const denom = sensorType === 'ph' ? (p.buffer - first.buffer) : (p.doSaturation - first.doSaturation);
+						const rawSlope = denom ? ((p.voltage - first.voltage) / denom) : 0;
+						pointSlope = Number.isFinite(rawSlope) ? rawSlope.toFixed(2) : '-';
+						const avgTemp = (first.temp + p.temp) / 2;
+						const rawOffset = avgTemp ? (avgTemp / 10) : 0;
+						pointOffset = Number.isFinite(rawOffset) ? rawOffset.toFixed(2) : '-';
+					}
+				}
+
+				html += `
+					<div class="cal-value"><div class="label">${valLabel}</div><div class="value">${val}</div></div>
+					<div class="cal-value"><div class="label">Voltage (mV)</div><div class="value">${p.voltage.toFixed(2)}</div></div>
+					<div class="cal-value"><div class="label">Temperature (°C)</div><div class="value">${p.temp.toFixed(2)}</div></div>
+					<div class="cal-value"><div class="label">Slope</div><div class="value">${pointSlope}</div></div>
+					<div class="cal-value"><div class="label">Offset</div><div class="value">${pointOffset}</div></div>
+				`;
+			});
+			displayArea.innerHTML = html;
+		}
+	}
 
 })(); // End of initCalibrate function
 
@@ -1128,7 +1211,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
 		// Track both exhaust fans separately (in/out)
 		setActuatorState('act-fan-in', Math.random()>0.4 ? 'ON':'OFF');
 		setActuatorState('act-fan-out', Math.random()>0.4 ? 'ON':'OFF');
-		setActuatorState('act-lights', Math.random()>0.3 ? 'ON':'OFF');
+		setActuatorState('act-lights-aerponics', Math.random()>0.3 ? 'ON':'OFF');
+		setActuatorState('act-lights-dwc', Math.random()>0.3 ? 'ON':'OFF');
 	}
 
 	// helper: set actuator state text + class
@@ -1150,6 +1234,54 @@ document.addEventListener('DOMContentLoaded', ()=>{
 			setActuatorState(span.id, next);
 		});
 	});
+
+	// Nutrient solution quick actions
+	function showNutrientNotification(label){
+		const container = document.getElementById('notificationContainer');
+		if(!container) return;
+		const notif = document.createElement('div');
+		notif.className = 'notification neutral';
+		notif.innerHTML = `
+			<div class="notification-icon">💧</div>
+			<div class="notification-content">
+				<div class="notification-title">Nutrient Solution</div>
+				<div class="notification-message">${label} triggered</div>
+			</div>
+		`;
+		container.appendChild(notif);
+		requestAnimationFrame(() => notif.classList.add('show'));
+		setTimeout(() => {
+			notif.classList.remove('show');
+			setTimeout(() => notif.remove(), 300);
+		}, 2500);
+	}
+
+	function setupNutrientButtons(){
+		const actions = [
+			{ id: 'btn-ph-up', label: 'pH Up' },
+			{ id: 'btn-ph-down', label: 'pH Down' },
+			{ id: 'btn-leafy-green', label: 'Leafy Green' }
+		];
+
+		actions.forEach(action => {
+			const btn = document.getElementById(action.id);
+			if(!btn) return;
+			btn.addEventListener('click', () => {
+				if(btn.disabled) return;
+				btn.disabled = true;
+				btn.classList.add('is-dosing');
+				btn.setAttribute('aria-pressed', 'true');
+				showNutrientNotification(action.label);
+				setTimeout(() => {
+					btn.disabled = false;
+					btn.classList.remove('is-dosing');
+					btn.setAttribute('aria-pressed', 'false');
+				}, 5000);
+			});
+		});
+	}
+
+	setupNutrientButtons();
 
 	// initial draw and periodic updates - wait a bit for layout to settle
 	setTimeout(() => {

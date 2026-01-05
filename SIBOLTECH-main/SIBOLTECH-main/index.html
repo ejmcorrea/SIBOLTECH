@@ -109,8 +109,29 @@
 								<span class="state" id="act-fan-out">ON</span>
 							</div>
 							<div class="act">
-								<div>Grow Lights</div>
-								<span class="state" id="act-lights">ON</span>
+								<div>Grow Lights (Aerponics)</div>
+								<span class="state" id="act-lights-aerponics">ON</span>
+							</div>
+							<div class="act">
+								<div>Grow Lights(DWC)</div>
+								<span class="state" id="act-lights-dwc">ON</span>
+							</div>
+						</div>
+					</div>
+					<div class="nutrition-solution-card">
+						<div class="card-header">Nutrient Solution</div>
+						<div class="nutrient-grid">
+							<div class="nutrient-item">
+								<div class="nutrient-label">pH Up</div>
+								<button class="nutrient-btn" id="btn-ph-up" aria-label="Activate pH Up"></button>
+							</div>
+							<div class="nutrient-item">
+								<div class="nutrient-label">pH Down</div>
+								<button class="nutrient-btn" id="btn-ph-down" aria-label="Activate pH Down"></button>
+							</div>
+							<div class="nutrient-item">
+								<div class="nutrient-label">Leafy Green</div>
+								<button class="nutrient-btn" id="btn-leafy-green" aria-label="Activate Leafy Green"></button>
 							</div>
 						</div>
 					</div>
@@ -633,7 +654,7 @@
 						</div>
 					</div>
 
-					<div class="cal-card calibration-values" id="calibrationValuesSection" style="display: none !important;">
+					<div class="cal-card calibration-values" id="calibrationValuesSection" style="display: none;">
 						<div class="card-header">Calibration Values:</div>
 						<div class="values-grid">
 							<div class="value-card"><div class="label">Slope</div><div class="value" id="outSlope">-</div></div>
@@ -852,8 +873,24 @@
 				</div>
 			</div>
 		</div>
-	
 
+		<!-- Calibration Confirmation Modal -->
+		<div id="calibrationConfirmModal" class="calibration-validation-modal" style="display: none;">
+			<div class="calibration-validation-content">
+				<div class="calibration-validation-header">
+					<h3>⚠️ Confirm Calibration Update</h3>
+					<button class="calibration-validation-close" id="calibrationConfirmClose">&times;</button>
+				</div>
+				<div class="calibration-validation-body">
+					<p>Are you sure you want to update calibration?</p>
+					<p style="margin-top: 10px; font-size: 0.95em; color: #666;">This will turn off the calibration mode.</p>
+				</div>
+				<div class="calibration-validation-footer">
+					<button class="calibration-validation-ok-btn" id="calibrationConfirmCancel" style="background: #666;">Cancel</button>
+					<button class="calibration-validation-ok-btn" id="calibrationConfirmOk">Confirm</button>
+				</div>
+			</div>
+		</div>
 		<script src="index.js"></script>
 </body>
 
